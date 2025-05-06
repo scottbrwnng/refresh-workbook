@@ -2,12 +2,15 @@ import keyring
 from pathlib import Path
 import tableauserverclient as tsc
 
-def main():
+# IMPORTANT!!!
+# See the original repo here! https://github.com/CodingOnWindowsOS/Tableau/tree/main/Tableau%20Server%20Client
+
+def push_workbook():
     # Setup
     # Store token name, token value, and site ID in variables.
     token_name = 'TSM'
     token_value = keyring.get_password('Tableau Server Management', 'TSM')
-    site_id = 'sqlshortreads'
+    site_id = 'sqlshortreads'    
     # Create authentication object using the token and site ID details.
     tableau_auth = tsc.PersonalAccessTokenAuth(token_name=token_name, personal_access_token=token_value, site_id=site_id)
     # Create a tableau server client object using specified server URL.
@@ -36,8 +39,8 @@ def main():
         try:
             server.workbooks.publish(
                 workbook_item=new_workbook,
-                file=Path('C:/Users/Chris/Desktop/social_media_content/youtube/tableau_server_client/tutorial_20/europe_sales_open_pipeline.twbx'),
-                mode='CreateNew',
+                file=Path('C:\\path\\to\\workbook\\stgn.twbx'),
+                mode='Overwrite', #see additional params here: https://tableau.github.io/server-client-python/docs/api-ref#workbooks
                 connection_credentials=None,
                 as_job=False
             )
@@ -45,6 +48,27 @@ def main():
             print(f'Unable to publish {new_workbook.name}.')
         else:
             print(f'{new_workbook.name} successfully published.')
+            
 
-if __name__ == '__main__':
-    main()
+
+
+def xml_replace(wb: xml) -> None:
+
+    from pathlib import Path # never used this before..... 
+
+    # Path to your Tableau workbook (.twb)
+    input_path = Path("your_workbook.twb")
+    output_path = Path("your_workbook_stgn.twb")
+
+    # Read workbook content
+    xml = input_path.read_text(encoding="utf-8")
+
+    # Replace schema references
+    xml = xml.replace("[dbo].", "[stgn].")
+
+    # Save modified workbook
+    output_path.write_text(xml, encoding="utf-8")
+
+    #now this workbook can be uploaded to server using above func
+
+    print(f"Updated workbook saved to: {output_path}")
